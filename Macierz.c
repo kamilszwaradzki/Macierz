@@ -35,7 +35,7 @@ void Matrix_destroy(struct Matrix *mat) // Usunięcie macierzy
    free(mat);
 } // void Matrix_destroy(struct Matrix *mat)
 
-void Matrix_fill(struct Matrix *mat) // Wypełnienie macierzy
+void Matrix_fill(struct Matrix *mat, short *err_no) // Wypełnienie macierzy
 {
 
         int buffer = 0; // zmienna służąca za bufor dla błędów ;)
@@ -48,9 +48,12 @@ void Matrix_fill(struct Matrix *mat) // Wypełnienie macierzy
                printf("wprowadz a[%d][%d]: ", i+1, j+1);
                 while(scanf("%i", &mat->matrix[i][j]) != 1)
                 {
+
+                    if(feof(stdin) != 0){ (*err_no) = 0; break;}
                    	while((buffer = getchar()) != '\n' && buffer != EOF); // czyści bufor wejścia
                     printf("wprowadz a[%d][%d]: ", i+1, j+1);
                 }
+               if((*err_no) == 0) {return;}
             }
         }
 } // void Matrix_fill(struct Matrix *mat)
@@ -78,7 +81,8 @@ int main()
     if(!err_no){ return 1;}
 
     struct Matrix *mat_1 = Matrix_create(rows,cols);
-    Matrix_fill(mat_1); // Wypełnienie nowo utworzonej mat_1.
+    Matrix_fill(mat_1, &err_no); // Wypełnienie nowo utworzonej mat_1.
+    if(!err_no){ return 1;}
     Matrix_print(mat_1); // Wyświetlenie zawartości mat_1.
     Matrix_destroy(mat_1); // Posprzątanie po mat_1.
 
