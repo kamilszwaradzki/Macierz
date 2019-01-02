@@ -11,17 +11,22 @@ struct Matrix{
 
 int** Array_2D(int,int); // Funkcja przydzielająca pamięć dla tablicy 2-wymiarowej
 
-struct Matrix *Matrix_create(int row, int col) // konstruktor
+void Matrix_fill(struct Matrix *, short *); // Wypełnienie macierzy
+
+struct Matrix *Matrix_create(int row, int col, short *err_no) // konstruktor
 {
     struct Matrix *mat = malloc(sizeof(struct Matrix));
+    
     assert(mat != NULL); // Funkcja przerwie program gdy wskaźnik będzie NULLem czyli pusty.
     assert(col > 0 && row > 0); // przerwie program gdy liczba kolumn i wierszy nie będzie dodatnia.
+    
     mat->col = col;
     mat->row = row;
     mat->matrix = Array_2D(row,col);
-
+    Matrix_fill(mat,err_no); 
+   
     return mat;
-} // struct Matrix *Matrix_create(int row, int col)
+} // struct Matrix *Matrix_create(int row, int col, short *err_no)
 
 void Matrix_destroy(struct Matrix *mat) // Usunięcie macierzy
 {
@@ -34,29 +39,6 @@ void Matrix_destroy(struct Matrix *mat) // Usunięcie macierzy
    free(mat->matrix);
    free(mat);
 } // void Matrix_destroy(struct Matrix *mat)
-
-void Matrix_fill(struct Matrix *mat, short *err_no) // Wypełnienie macierzy
-{
-
-        int buffer = 0; // zmienna służąca za bufor dla błędów ;)
-        printf("Wprowadz elementy macierzy[%i]x[%i]\n",mat->row,mat->col);
-
-        for(int i = 0; i < mat->row; ++i)
-        { 
-           for(int j=0; j < mat->col; ++j)
-            {
-               printf("wprowadz a[%d][%d]: ", i+1, j+1);
-                while(scanf("%i", &mat->matrix[i][j]) != 1)
-                {
-
-                    if(feof(stdin) != 0){ (*err_no) = 0; break;}
-                   	while((buffer = getchar()) != '\n' && buffer != EOF); // czyści bufor wejścia
-                    printf("wprowadz a[%d][%d]: ", i+1, j+1);
-                }
-               if((*err_no) == 0) {return;}
-            }
-        }
-} // void Matrix_fill(struct Matrix *mat)
 
 void Matrix_print(struct Matrix *mat) //Wyświetla zawartość macierzy
 {
@@ -80,9 +62,11 @@ int main()
     setSizeMat(&rows,&cols,&err_no);
     if(!err_no){ return 1;}
 
-    struct Matrix *mat_1 = Matrix_create(rows,cols);
-    Matrix_fill(mat_1, &err_no); // Wypełnienie nowo utworzonej mat_1.
-    if(!err_no){ return 1;}
+    struct Matrix *mat_1 = Matrix_create(rows,cols,&err_no);
+    if(!err_no){ 
+        Matrix_destroy(mat_1); // Posprzątanie po mat_1.
+        return 1; 
+    }
     Matrix_print(mat_1); // Wyświetlenie zawartości mat_1.
     Matrix_destroy(mat_1); // Posprzątanie po mat_1.
 
@@ -90,7 +74,7 @@ int main()
     return 0;
 } // int main()
 
-void setSizeMat(int *rows, int *cols,short *err_no)
+void setSizeMat(int *rows, int *cols, short *err_no)
 {
     printf("Podaj liczbe wierszy: ");
     while(scanf("%i", &(*rows)) != 1)
@@ -110,7 +94,8 @@ void setSizeMat(int *rows, int *cols,short *err_no)
         printf("Podaj liczbe kolumn: ");
 
     } 
-} // void setSizeMat(int *rows,int *cols)
+} // void setSizeMat(int *rows, int *cols, short *err_no)
+
 
 int** Array_2D(int row, int col) 
 {
@@ -123,3 +108,26 @@ int** Array_2D(int row, int col)
     }
     return theArray; // Zwrócenie tablicy dwu-wymiarowej
 } // int** Array_2D(int row, int col) 
+
+void Matrix_fill(struct Matrix *mat, short *err_no) // Wypełnienie macierzy
+{
+
+        int buffer = 0; // zmienna służąca za bufor dla błędów ;)
+        printf("Wprowadz elementy macierzy[%i]x[%i]\n",mat->row,mat->col);
+
+        for(int i = 0; i < mat->row; ++i)
+        { 
+           for(int j=0; j < mat->col; ++j)
+            {
+               printf("wprowadz a[%d][%d]: ", i+1, j+1);
+                while(scanf("%i", &mat->matrix[i][j]) != 1)
+                {
+
+                    if(feof(stdin) != 0){ (*err_no) = 0; break;}
+                   	while((buffer = getchar()) != '\n' && buffer != EOF); // czyści bufor wejścia
+                    printf("wprowadz a[%d][%d]: ", i+1, j+1);
+                }
+               if((*err_no) == 0) {return;}
+            }
+        }
+} // void Matrix_fill(struct Matrix *mat, short *err_no)
