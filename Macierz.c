@@ -131,6 +131,7 @@ void Matrix_ops(char ops, struct Matrix *mat, struct Matrix *mat_2) // Dodawanie
                     {
                         mat -> matrix[z][s] = ptrArr[z][s];
                     }
+                        free(ptrArr[z]);
                 }
                 mat -> col = mat_2 -> col;
                 
