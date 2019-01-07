@@ -55,12 +55,16 @@ void Matrix_print(struct Matrix *mat) //Wyświetla zawartość macierzy
            }
 } // void Matrix_print(struct Matrix *mat)
 
-void Matrix_add(struct Matrix *mat, struct Matrix *mat_2) // Dodawanie macierzy 
+void Matrix_ops(char ops, struct Matrix *mat, struct Matrix *mat_2) // Dodawanie macierzy 
 {
-           assert(mat != NULL && mat_2 != NULL);
+    assert(mat != NULL && mat_2 != NULL);
     
-           if(mat -> col == mat_2 -> col && mat -> row == mat_2 -> row)
-           {
+    switch(ops)
+    {
+        case 'a': // operacja dodawania macierzy
+        {  
+            if(mat -> col == mat_2 -> col && mat -> row == mat_2 -> row)
+            {
                for(int i = 0; i < mat->row; ++i)
                {
                      for(int j = 0; j < mat->col; ++j)
@@ -68,14 +72,80 @@ void Matrix_add(struct Matrix *mat, struct Matrix *mat_2) // Dodawanie macierzy
                         mat->matrix[i][j] += mat_2->matrix[i][j];
                      }
                }
-                printf("\nMacierz po dodaniu: \n");
-                Matrix_print(mat);
-           }
-           else{
-               printf("Blad: Nie mozna dodac dwoch macierzy: sa innego rozmiaru.");
-           }
-} // void Matrix_add(struct Matrix *mat, struct Matrix *mat_2)
+               printf("\nMacierz po dodaniu: \n");
+               Matrix_print(mat);
+            }
+            else{
+                printf("\nError: Nie mozna dodac dwoch macierzy - maja rozne wymiary.");
+            }
+            break;
+        } // case 'a':
 
+        case 's': //operacja odejmowania macierzy
+        {
+            if(mat -> col == mat_2 -> col && mat -> row == mat_2 -> row)
+            {
+                for(int i = 0; i < mat->row; ++i)
+                {
+                     for(int j = 0; j < mat->col; ++j)
+                     {
+                        mat->matrix[i][j] -= mat_2->matrix[i][j];
+                     }
+                }
+                printf("\nMacierz po odjeciu: \n");
+                Matrix_print(mat);
+            }
+            else{
+               printf("\nError: Nie mozna odjac dwoch macierzy - maja rozne wymiary.");
+            }
+            break;
+        } // case 's':
+        case 'm': // operacja mnożenia macierzy
+        {
+            int sum = 0, i = 0, j = 0,z = 0;
+            int** ptrArr;
+            ptrArr = Array_2D(&mat -> row,&mat_2 -> col);
+            printf("Macierz po przemnozeniu:\n");
+            if(mat -> col == mat_2 -> row)
+            {
+                for(i = 0; i < mat -> row; ++i)
+                {
+                    for(j = 0; j < mat_2 -> col; ++j)
+                    {
+                        for(int k = 0; k < mat_2 -> row; ++k)
+                        {
+                            sum += mat -> matrix[i][k] * mat_2 -> matrix[k][j];
+                        }
+                        ptrArr[i][j] = sum;
+                        //printf("%3i",ptrArr[i][j]);
+                        sum = 0;
+                    }
+                    printf("\n");
+                }
+
+                mat -> matrix = (int**) realloc(mat -> matrix,mat -> row * sizeof(int*)); // Reallokacja pamięci dla tablicy
+
+                for(z = 0; z < mat -> row; ++z)
+                {
+                    for(int s = 0; s < mat_2 -> col; ++s)
+                    {
+                        mat -> matrix[z][s] = ptrArr[z][s];
+                    }
+                }
+                mat -> col = mat_2 -> col;
+                
+                free(ptrArr);
+            }
+            else{
+                printf("\nError: nie mozna mnozyc - dlugosc kolumn nie odpowiada dlugosci wierszy.");
+            }
+            break;
+        } // case 'm':
+
+        default:
+            break;
+    } // switch(&ops)
+} // void Matrix_ops(char a, struct Matrix *mat, struct Matrix *mat_2)
 
 int main()
 {
@@ -87,8 +157,8 @@ int main()
     struct Matrix *mat_2 = Matrix_create(rows,cols);
     Matrix_print(mat_2); // Wyświetlenie zawartości mat_2.
 
-    Matrix_add(mat_1,mat_2); // Dodanie dwóch macierzy.
-    
+    Matrix_ops('m',mat_1,mat_2);
+    Matrix_print(mat_1);
     Matrix_destroy(mat_1); // Posprzątanie po mat_1.
     Matrix_destroy(mat_2); // Posprzątanie po mat_2.
 
