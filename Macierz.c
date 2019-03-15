@@ -9,6 +9,8 @@ struct Matrix{
     int col;
 }; //struct Matrix
 
+void buffer_clear(int); // Czyszczenie bufora 
+
 int** Array_2D(const int *,const int *); // Funkcja przydzielająca pamięć dla tablicy 2-wymiarowej
 
 void Matrix_fill(struct Matrix *); // Wypełnienie macierzy
@@ -45,20 +47,28 @@ void Matrix_destroy(struct Matrix *mat) // Usunięcie macierzy
 
 void Matrix_print(struct Matrix *mat) //Wyświetla zawartość macierzy
 {
-           for(int i = 0; i < mat->row; ++i)
-           {
-                 for(int j = 0; j < mat->col; ++j)
-                 {
-                     printf("%3i",mat->matrix[i][j]);
-                 }
-                 printf("\n");
-           }
+    printf("\n");
+    
+    for(int i = 0; i < mat->row; ++i)
+    {
+         for(int j = 0; j < mat->col; ++j)
+         {
+             printf("%3i",mat->matrix[i][j]);
+         }
+         printf("\n");
+    }
 } // void Matrix_print(struct Matrix *mat)
 
-void Matrix_ops(char ops, struct Matrix *mat, struct Matrix *mat_2) // Dodawanie macierzy 
+void gauss(struct Matrix *mat); // odejmowanie macierzy 
+void ungauss(struct Matrix *mat); // odejmowanie macierzy 
+
+void Matrix_ops(struct Matrix *mat, struct Matrix *mat_2) // Dodawanie macierzy 
 {
     assert(mat != NULL && mat_2 != NULL);
-    
+    buffer_clear(0);
+    char ops;
+    printf("Dodawanie(a)/Odejmowanie(s)/Mnozenie(m)/Eliminacja Gaussa(g)\nJaka operacje chcesz wykonac? ");
+    scanf("%c",&ops);
     switch(ops)
     {
         case 'a': // operacja dodawania macierzy
@@ -72,7 +82,7 @@ void Matrix_ops(char ops, struct Matrix *mat, struct Matrix *mat_2) // Dodawanie
                         mat->matrix[i][j] += mat_2->matrix[i][j];
                      }
                }
-               printf("\nMacierz po dodaniu: \n");
+               printf("\nMacierz po dodaniu:");
                Matrix_print(mat);
             }
             else{
@@ -100,12 +110,13 @@ void Matrix_ops(char ops, struct Matrix *mat, struct Matrix *mat_2) // Dodawanie
             }
             break;
         } // case 's':
+
         case 'm': // operacja mnożenia macierzy
         {
             int sum = 0, i = 0, j = 0,z = 0;
             int** ptrArr;
             ptrArr = Array_2D(&mat -> row,&mat_2 -> col);
-            printf("Macierz po przemnozeniu:\n");
+            printf("Macierz po przemnozeniu:");
             if(mat -> col == mat_2 -> row)
             {
                 for(i = 0; i < mat -> row; ++i)
@@ -117,24 +128,16 @@ void Matrix_ops(char ops, struct Matrix *mat, struct Matrix *mat_2) // Dodawanie
                             sum += mat -> matrix[i][k] * mat_2 -> matrix[k][j];
                         }
                         ptrArr[i][j] = sum;
-                        //printf("%3i",ptrArr[i][j]);
+                        printf("%3i",ptrArr[i][j]);
                         sum = 0;
                     }
                     printf("\n");
                 }
-
-                mat -> matrix = (int**) realloc(mat -> matrix,mat -> row * sizeof(int*)); // Reallokacja pamięci dla tablicy
-
                 for(z = 0; z < mat -> row; ++z)
                 {
-                    for(int s = 0; s < mat_2 -> col; ++s)
-                    {
-                        mat -> matrix[z][s] = ptrArr[z][s];
-                    }
-                        free(ptrArr[z]);
+                     free(ptrArr[z]);
                 }
-                mat -> col = mat_2 -> col;
-                
+                 
                 free(ptrArr);
             }
             else{
@@ -143,23 +146,82 @@ void Matrix_ops(char ops, struct Matrix *mat, struct Matrix *mat_2) // Dodawanie
             break;
         } // case 'm':
 
+        case 'g': // Eliminacja Gausa
+        {
+            char wyb; 
+            while(!(wyb == 't' || wyb == 'T'))
+            {        
+
+                buffer_clear(0); // Czyszczenie bufora 
+                printf("Dodac(d)/odjac(o) wiersze metoda gaussa? ");
+                scanf("%c",&wyb);
+                if(feof(stdin) != 0){ clearerr(stdin); break;}
+                wyb == 'd' || wyb == 'o' ? (wyb == 'd' ? ungauss(mat) : gauss(mat)) : puts("Error! Bledna operacja!");
+                printf("Chcesz wyjsc z programu?(t\\n)");
+                buffer_clear(wyb);
+                scanf("%c",&wyb);
+            }
+            break;
+        } // case 'g':
+
         default:
             break;
     } // switch(&ops)
 } // void Matrix_ops(char a, struct Matrix *mat, struct Matrix *mat_2)
+
+void gauss(struct Matrix *mat) // odejmowanie macierzy 
+{
+        assert(mat != NULL);
+        int i = 0, k = 0;    
+        
+        printf("Od jakiego wiersza chcesz odjac? ");
+        scanf("%i",&i);
+        if(feof(stdin) != 0){ clearerr(stdin); return; }
+       
+        printf("Jaki wiersz ma temu posluzyc? ");
+        scanf("%i",&k);
+        if(feof(stdin) != 0){ clearerr(stdin); return; }
+
+        for(int j = 0; j < mat->col; ++j)
+        {
+           mat->matrix[i-1][j] -= mat->matrix[k-1][j];
+        }
+        printf("Macierz po odjeciu:");
+        Matrix_print(mat);
+} //  void gauss(struct Matrix *mat)  
+
+void ungauss(struct Matrix *mat) // dodawanie macierzy 
+{
+        assert(mat != NULL);
+        int i = 0, k = 0;    
+        
+        printf("Do jakiego wiersza chcesz dodac? ");
+        scanf("%i",&i);
+        if(feof(stdin) != 0){ clearerr(stdin); return; }
+        
+        printf("Jaki wiersz ma temu posluzyc? ");
+        scanf("%i",&k);
+        if(feof(stdin) != 0){ clearerr(stdin); return; }
+        
+        for(int j = 0; j < mat->col; ++j)
+        {
+           mat->matrix[i-1][j] += mat->matrix[k-1][j];
+        }
+        printf("Macierz po dodaniu:");
+        Matrix_print(mat);
+} // void ungauss(struct Matrix *mat)
 
 int main()
 {
     int rows = 0, cols = 0;
 
     struct Matrix *mat_1 = Matrix_create(rows,cols);
-    Matrix_print(mat_1); // Wyświetlenie zawartości mat_1.
-    
     struct Matrix *mat_2 = Matrix_create(rows,cols);
-    Matrix_print(mat_2); // Wyświetlenie zawartości mat_2.
 
-    Matrix_ops('m',mat_1,mat_2);
-    Matrix_print(mat_1);
+    Matrix_print(mat_1); // Wyświetlenie zawartości mat_1.
+    Matrix_print(mat_2); // Wyświetlenie zawartości mat_1.
+    Matrix_ops(mat_1,mat_2); // Wykonanie operacji gaussa
+
     Matrix_destroy(mat_1); // Posprzątanie po mat_1.
     Matrix_destroy(mat_2); // Posprzątanie po mat_2.
 
@@ -173,7 +235,7 @@ void setSizeMat(int *rows, int *cols)
     while(scanf("%i", &(*rows)) != 1)
     {
         if(feof(stdin) != 0){ clearerr(stdin); }
-        while(((*rows) = getchar()) != '\n' && (*rows) != EOF){} // czyści bufor wejścia
+        buffer_clear(*rows);
         printf("Podaj liczbe wierszy: ");
     }
 
@@ -182,7 +244,7 @@ void setSizeMat(int *rows, int *cols)
     {
 
         if(feof(stdin) != 0){ clearerr(stdin); }
-        while(((*cols) = getchar()) != '\n' && (*cols) != EOF){} // czyści bufor wejścia
+        buffer_clear(*cols);
         printf("Podaj liczbe kolumn: ");
 
     } 
@@ -216,9 +278,13 @@ void Matrix_fill(struct Matrix *mat) // Wypełnienie macierzy
                 {
 
                     if(feof(stdin) != 0){ clearerr(stdin); }
-                   	while((buffer = getchar()) != '\n' && buffer != EOF){} // czyści bufor wejścia
+                    buffer_clear(buffer);
                     printf("wprowadz a[%d][%d]: ", i+1, j+1);
                 }
             }
         }
 } // void Matrix_fill(struct Matrix *mat)
+void buffer_clear(int c)
+{
+    while ((c = getchar()) != '\n' && c != EOF) {  }
+} // buffer_clear(int c)
