@@ -1,2 +1,2 @@
-main Macierz.c:
-	cc Macierz.c -lm -o Macierz
+main Matrix.c:
+	cc Matrix.c -lm -o Matrix
