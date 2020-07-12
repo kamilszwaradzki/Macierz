@@ -4,26 +4,26 @@
 #include <stdlib.h>
 
 struct Matrix{
-    int** matrix; // Tablica dynamiczna 2-wymiarowa.
+    int** matrix; // 2D Dynamic Array
     int row;
     int col;
 }; //struct Matrix
 
-void buffer_clear(int); // Czyszczenie bufora 
+void buffer_clear(int); // Clear input buffer
 
-int** Array_2D(const int *,const int *); // Funkcja przydzielająca pamięć dla tablicy 2-wymiarowej
+int** Array_2D(const int *,const int *); // Function assigning memory for a 2-dimensional array
 
-void Matrix_fill(struct Matrix *); // Wypełnienie macierzy
+void Matrix_fill(struct Matrix *); // Fill matrix
 
-void setSizeMat(int *, int *); // Funkcja służąca do wyznaczenia rozmiaru macierzy.
+void setSizeMat(int *, int *); // This function is used to determine the size of the matrix.
 
-struct Matrix *Matrix_create(int row, int col) // konstruktor
+struct Matrix *Matrix_create(int row, int col) // Constructor
 {
     struct Matrix *mat = malloc(sizeof(struct Matrix));
     
     setSizeMat(&row, &col);
-    assert(mat != NULL); // Funkcja przerwie program gdy wskaźnik będzie NULLem czyli pusty.
-    assert(col > 0 && row > 0); // przerwie program gdy liczba kolumn i wierszy nie będzie dodatnia.
+    assert(mat != NULL);
+    assert(col > 0 && row > 0); 
     
     mat->col = col;
     mat->row = row;
@@ -33,9 +33,9 @@ struct Matrix *Matrix_create(int row, int col) // konstruktor
     return mat;
 } // struct Matrix *Matrix_create(int row, int col)
 
-void Matrix_destroy(struct Matrix *mat) // Usunięcie macierzy
+void Matrix_destroy(struct Matrix *mat) // Destroy matrix
 {
-    assert(mat != NULL); // Jak wyżej
+    assert(mat != NULL);
    
     for (int i = 0; i < mat->row; i++){
        free(mat->matrix[i]);
@@ -45,7 +45,7 @@ void Matrix_destroy(struct Matrix *mat) // Usunięcie macierzy
    free(mat);
 } // void Matrix_destroy(struct Matrix *mat)
 
-void Matrix_print(struct Matrix *mat) //Wyświetla zawartość macierzy
+void Matrix_print(struct Matrix *mat) // Print a matrix
 {
     printf("\n");
     
@@ -59,19 +59,19 @@ void Matrix_print(struct Matrix *mat) //Wyświetla zawartość macierzy
     }
 } // void Matrix_print(struct Matrix *mat)
 
-void gauss(struct Matrix *mat); // odejmowanie macierzy 
-void ungauss(struct Matrix *mat); // odejmowanie macierzy 
+void gauss(struct Matrix *mat);
+void ungauss(struct Matrix *mat);
 
-void Matrix_ops(struct Matrix *mat, struct Matrix *mat_2) // Dodawanie macierzy 
+void Matrix_ops(struct Matrix *mat, struct Matrix *mat_2)
 {
     assert(mat != NULL && mat_2 != NULL);
     buffer_clear(0);
     char ops;
-    printf("Dodawanie(a)/Odejmowanie(s)/Mnozenie(m)/Eliminacja Gaussa(g)\nJaka operacje chcesz wykonac? ");
+    printf("Adding(a)/Subtract(s)/Multiply(m)/Elimination of Gauss(g)\nWhich operation do you want to perform? ");
     scanf("%c",&ops);
     switch(ops)
     {
-        case 'a': // operacja dodawania macierzy
+        case 'a': // Operation of adding matrices
         {  
             if(mat -> col == mat_2 -> col && mat -> row == mat_2 -> row)
             {
@@ -82,16 +82,16 @@ void Matrix_ops(struct Matrix *mat, struct Matrix *mat_2) // Dodawanie macierzy
                         mat->matrix[i][j] += mat_2->matrix[i][j];
                      }
                }
-               printf("\nMacierz po dodaniu:");
+               printf("\nMatrix after adding:");
                Matrix_print(mat);
             }
             else{
-                printf("\nError: Nie mozna dodac dwoch macierzy - maja rozne wymiary.");
+                printf("\nError: Cannot add two matrices - they have different dimensions.");
             }
             break;
         } // case 'a':
 
-        case 's': //operacja odejmowania macierzy
+        case 's': // Operation of substracting matrices
         {
             if(mat -> col == mat_2 -> col && mat -> row == mat_2 -> row)
             {
@@ -102,21 +102,21 @@ void Matrix_ops(struct Matrix *mat, struct Matrix *mat_2) // Dodawanie macierzy
                         mat->matrix[i][j] -= mat_2->matrix[i][j];
                      }
                 }
-                printf("\nMacierz po odjeciu: \n");
+                printf("\nMatrix after subtraction: \n");
                 Matrix_print(mat);
             }
             else{
-               printf("\nError: Nie mozna odjac dwoch macierzy - maja rozne wymiary.");
+               printf("\nError: Cannot subtract two matrices - they have different dimensions.");
             }
             break;
         } // case 's':
 
-        case 'm': // operacja mnożenia macierzy
+        case 'm': // Operation of multiplying matrices
         {
             int sum = 0, i = 0, j = 0,z = 0;
             int** ptrArr;
             ptrArr = Array_2D(&mat -> row,&mat_2 -> col);
-            printf("Macierz po przemnozeniu:");
+            printf("Matrix after multiplying:");
             if(mat -> col == mat_2 -> row)
             {
                 for(i = 0; i < mat -> row; ++i)
@@ -141,25 +141,25 @@ void Matrix_ops(struct Matrix *mat, struct Matrix *mat_2) // Dodawanie macierzy
                 free(ptrArr);
             }
             else{
-                printf("\nError: nie mozna mnozyc - dlugosc kolumn nie odpowiada dlugosci wierszy.");
+                printf("\nError: Cannot be multiplied - the length of the columns does not correspond to the length of the rows.");
             }
             break;
         } // case 'm':
 
-        case 'g': // Eliminacja Gausa
+        case 'g': // Elimination of Gauss
         {
-            char wyb; 
-            while(!(wyb == 't' || wyb == 'T'))
+            char choice; 
+            while(!(choice == 'y' || choice == 'Y'))
             {        
 
-                buffer_clear(0); // Czyszczenie bufora 
-                printf("Dodac(d)/odjac(o) wiersze metoda gaussa? ");
-                scanf("%c",&wyb);
+                buffer_clear(0);
+                printf("Add(a)/Remove(r) the rows with the gauss method? ");
+                scanf("%c",&choice);
                 if(feof(stdin) != 0){ clearerr(stdin); break;}
-                wyb == 'd' || wyb == 'o' ? (wyb == 'd' ? ungauss(mat) : gauss(mat)) : puts("Error! Bledna operacja!");
-                printf("Chcesz wyjsc z programu?(t\\n)");
-                buffer_clear(wyb);
-                scanf("%c",&wyb);
+                choice == 'a' || choice == 'r' ? (choice == 'a' ? ungauss(mat) : gauss(mat)) : puts("Error! Wrong operation!");
+                printf("Do you want to quit the program?(y\\n)");
+                buffer_clear(choice);
+                scanf("%c",&choice);
             }
             break;
         } // case 'g':
@@ -169,16 +169,16 @@ void Matrix_ops(struct Matrix *mat, struct Matrix *mat_2) // Dodawanie macierzy
     } // switch(&ops)
 } // void Matrix_ops(char a, struct Matrix *mat, struct Matrix *mat_2)
 
-void gauss(struct Matrix *mat) // odejmowanie macierzy 
+void gauss(struct Matrix *mat) // Subtraction of matrix rows 
 {
         assert(mat != NULL);
         int i = 0, k = 0;    
         
-        printf("Od jakiego wiersza chcesz odjac? ");
+        printf("Which row do you want to subtract? ");
         scanf("%i",&i);
         if(feof(stdin) != 0){ clearerr(stdin); return; }
        
-        printf("Jaki wiersz ma temu posluzyc? ");
+        printf("Which row is the one to serve this? ");
         scanf("%i",&k);
         if(feof(stdin) != 0){ clearerr(stdin); return; }
 
@@ -186,20 +186,20 @@ void gauss(struct Matrix *mat) // odejmowanie macierzy
         {
            mat->matrix[i-1][j] -= mat->matrix[k-1][j];
         }
-        printf("Macierz po odjeciu:");
+        printf("Matrix after subtraction:");
         Matrix_print(mat);
 } //  void gauss(struct Matrix *mat)  
 
-void ungauss(struct Matrix *mat) // dodawanie macierzy 
+void ungauss(struct Matrix *mat) // Adding rows in the matrix
 {
         assert(mat != NULL);
         int i = 0, k = 0;    
         
-        printf("Do jakiego wiersza chcesz dodac? ");
+        printf("Which row do you want to add? ");
         scanf("%i",&i);
         if(feof(stdin) != 0){ clearerr(stdin); return; }
         
-        printf("Jaki wiersz ma temu posluzyc? ");
+        printf("Which row is the one to serve this? ");
         scanf("%i",&k);
         if(feof(stdin) != 0){ clearerr(stdin); return; }
         
@@ -207,7 +207,7 @@ void ungauss(struct Matrix *mat) // dodawanie macierzy
         {
            mat->matrix[i-1][j] += mat->matrix[k-1][j];
         }
-        printf("Macierz po dodaniu:");
+        printf("Matrix after adding:");
         Matrix_print(mat);
 } // void ungauss(struct Matrix *mat)
 
@@ -218,12 +218,12 @@ int main()
     struct Matrix *mat_1 = Matrix_create(rows,cols);
     struct Matrix *mat_2 = Matrix_create(rows,cols);
 
-    Matrix_print(mat_1); // Wyświetlenie zawartości mat_1.
-    Matrix_print(mat_2); // Wyświetlenie zawartości mat_1.
-    Matrix_ops(mat_1,mat_2); // Wykonanie operacji gaussa
+    Matrix_print(mat_1); // Print mat_1.
+    Matrix_print(mat_2); // Print mat_2.
+    Matrix_ops(mat_1,mat_2);
 
-    Matrix_destroy(mat_1); // Posprzątanie po mat_1.
-    Matrix_destroy(mat_2); // Posprzątanie po mat_2.
+    Matrix_destroy(mat_1); // Destroy mat_1.
+    Matrix_destroy(mat_2); // Destroy mat_2.
 
     getchar();
     return 0;
@@ -231,21 +231,21 @@ int main()
 
 void setSizeMat(int *rows, int *cols)
 {
-    printf("Podaj liczbe wierszy: ");
+    printf("Enter the number of rows: ");
     while(scanf("%i", &(*rows)) != 1)
     {
         if(feof(stdin) != 0){ clearerr(stdin); }
         buffer_clear(*rows);
-        printf("Podaj liczbe wierszy: ");
+        printf("Enter the number of rows: ");
     }
 
-    printf("Podaj liczbe kolumn: ");
+    printf("Enter the number of columns: ");
     while(scanf("%i", &(*cols)) != 1)
     {
 
         if(feof(stdin) != 0){ clearerr(stdin); }
         buffer_clear(*cols);
-        printf("Podaj liczbe kolumn: ");
+        printf("Enter the number of columns: ");
 
     } 
 } // void setSizeMat(int *rows, int *cols)
@@ -253,33 +253,33 @@ void setSizeMat(int *rows, int *cols)
 
 int** Array_2D(const int *row,const int *col) 
 {
-    int** theArray; //Deklaracja tablicy wskaźników,która będzie imitować tablicę 2-wymiarową.
-    theArray = (int**) malloc((*row)*sizeof(int*)); // Allokacja pamięci dla tablicy
+    int** theArray; // Declaration of an pointer to pointer that will imitate a 2-dimensional array.
+    theArray = (int**) malloc((*row)*sizeof(int*)); // Allocation memory for the array
 
     for (int i = 0; i < (*row); i++)
     {
-        theArray[i] = (int*) malloc((*col)*sizeof(int)); // Alokacja dla tablicy w tablicy
+        theArray[i] = (int*) malloc((*col)*sizeof(int)); // Allocation memory for the array in the array
     }
-    return theArray; // Zwrócenie tablicy dwu-wymiarowej
+    return theArray; // Return a 2D array
 } // int** Array_2D(const int *row,const int *col) 
 
-void Matrix_fill(struct Matrix *mat) // Wypełnienie macierzy
+void Matrix_fill(struct Matrix *mat)
 {
 
-        int buffer = 0; // zmienna służąca za bufor dla błędów ;)
-        printf("Wprowadz elementy macierzy[%i]x[%i]\n",mat->row,mat->col);
+        int buffer = 0; // Variable used as buffer for errors ;)
+        printf("Enter the elements of the matrix[%i]x[%i]\n",mat->row,mat->col);
 
         for(int i = 0; i < mat->row; ++i)
         { 
            for(int j=0; j < mat->col; ++j)
             {
-               printf("wprowadz a[%d][%d]: ", i+1, j+1);
+               printf("Enter a[%d][%d]: ", i+1, j+1);
                 while(scanf("%i", &mat->matrix[i][j]) != 1)
                 {
 
                     if(feof(stdin) != 0){ clearerr(stdin); }
                     buffer_clear(buffer);
-                    printf("wprowadz a[%d][%d]: ", i+1, j+1);
+                    printf("Enter a[%d][%d]: ", i+1, j+1);
                 }
             }
         }
